@@ -37,4 +37,4 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace github.com/loopfz/gadgeto v0.11.2 => github.com/mcorbin/gadgeto v0.11.3-0.20220701211439-7b70ea363f17
+replace github.com/loopfz/gadgeto v0.11.2 => github.com/mcorbin/gadgeto v0.11.3-0.20220702083241-857ce53e8940

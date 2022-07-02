@@ -234,7 +234,7 @@ func (g *Generator) AddTag(name, desc string) {
 // AddOperation add a new operation to the OpenAPI specification
 // using the method and path of the route and the tonic
 // handler informations.
-func (g *Generator) AddOperation(path, method, tag string, in, out reflect.Type, info *OperationInfo) (*Operation, error) {
+func (g *Generator) AddOperation(path, method, tag, requestMediaType, responseMediaType string, in, out reflect.Type, info *OperationInfo) (*Operation, error) {
 	op := &Operation{
 		ID: uuid.Must(uuid.NewV4()).String(),
 	}
@@ -282,14 +282,14 @@ func (g *Generator) AddOperation(path, method, tag string, in, out reflect.Type,
 		if in.Kind() != reflect.Struct {
 			return nil, errors.New("input type is not a struct")
 		}
-		if err := g.setOperationParams(op, in, in, allowBody, path); err != nil {
+		if err := g.setOperationParams(op, in, in, allowBody, path, requestMediaType); err != nil {
 			return nil, err
 		}
 	}
 	// Generate the default response from the tonic
 	// handler return type. If the handler has no output
 	// type, the response won't have a schema.
-	if err := g.setOperationResponse(op, out, strconv.Itoa(info.StatusCode), tonic.MediaType(), info.StatusDescription, info.Headers, nil, nil); err != nil {
+	if err := g.setOperationResponse(op, out, strconv.Itoa(info.StatusCode), responseMediaType, info.StatusDescription, info.Headers, nil, nil); err != nil {
 		return nil, err
 	}
 	// Generate additional responses from the operation
@@ -299,7 +299,7 @@ func (g *Generator) AddOperation(path, method, tag string, in, out reflect.Type,
 			if err := g.setOperationResponse(op,
 				reflect.TypeOf(resp.Model),
 				resp.Code,
-				tonic.MediaType(),
+				responseMediaType,
 				resp.Description,
 				resp.Headers,
 				resp.Example,
@@ -406,7 +406,7 @@ func (g *Generator) setOperationResponse(op *Operation, t reflect.Type, code, mt
 
 	// The response may have no content type specified,
 	// in which case we don't assign a schema.
-	schema := g.newSchemaFromType(t)
+	schema := g.newSchemaFromType(t, mt)
 
 	if schema != nil || example != nil || castedExamples != nil {
 		r.Content[mt] = &MediaTypeOrRef{MediaType: &MediaType{
@@ -423,7 +423,7 @@ func (g *Generator) setOperationResponse(op *Operation, t reflect.Type, code, mt
 				// default to string if no type is given.
 				sor = &SchemaOrRef{Schema: &Schema{Type: "string"}}
 			} else {
-				sor = g.newSchemaFromType(reflect.TypeOf(h.Model))
+				sor = g.newSchemaFromType(reflect.TypeOf(h.Model), mt)
 			}
 			r.Headers[h.Name] = &HeaderOrRef{Header: &Header{
 				Description: h.Description,
@@ -438,11 +438,11 @@ func (g *Generator) setOperationResponse(op *Operation, t reflect.Type, code, mt
 
 // setOperationParams adds the fields of the struct type t
 // to the given operation.
-func (g *Generator) setOperationParams(op *Operation, t, parent reflect.Type, allowBody bool, path string) error {
+func (g *Generator) setOperationParams(op *Operation, t, parent reflect.Type, allowBody bool, path string, requestMediaType string) error {
 	if t.Kind() != reflect.Struct {
 		return errors.New("input type is not a struct")
 	}
-	if err := g.buildParamsRecursive(op, t, parent, allowBody); err != nil {
+	if err := g.buildParamsRecursive(op, t, parent, allowBody, requestMediaType); err != nil {
 		return err
 	}
 	// Input fields that are neither path- nor query-bound
@@ -452,7 +452,7 @@ func (g *Generator) setOperationParams(op *Operation, t, parent reflect.Type, al
 	// Replace the RequestBody's schema with a reference
 	// to the named schema in components/schemas
 	if op.RequestBody != nil {
-		mt := tonic.MediaType()
+		mt := requestMediaType
 		if mt == "" {
 			mt = anyMediaType
 		}
@@ -496,7 +496,7 @@ func (g *Generator) setOperationParams(op *Operation, t, parent reflect.Type, al
 	return nil
 }
 
-func (g *Generator) buildParamsRecursive(op *Operation, t, parent reflect.Type, allowBody bool) error {
+func (g *Generator) buildParamsRecursive(op *Operation, t, parent reflect.Type, allowBody bool, requestMediaType string) error {
 	for i := 0; i < t.NumField(); i++ {
 		sf := t.Field(i)
 		sft := sf.Type
@@ -527,7 +527,7 @@ func (g *Generator) buildParamsRecursive(op *Operation, t, parent reflect.Type, 
 						TypeName: g.typeName(parent),
 						Type:     parent,
 					})
-				} else if err := g.buildParamsRecursive(op, sft, parent, allowBody); err != nil {
+				} else if err := g.buildParamsRecursive(op, sft, parent, allowBody, requestMediaType); err != nil {
 					return err
 				}
 			}
@@ -536,7 +536,7 @@ func (g *Generator) buildParamsRecursive(op *Operation, t, parent reflect.Type, 
 			// Ignore unexported non-embedded fields.
 			continue
 		}
-		if err := g.addStructFieldToOperation(op, t, i, allowBody); err != nil {
+		if err := g.addStructFieldToOperation(op, t, i, allowBody, requestMediaType); err != nil {
 			return err
 		}
 	}
@@ -555,10 +555,10 @@ func (g *Generator) paramyByLocation(p1, p2 *ParameterOrRef) bool {
 // t at index idx to the operation op. A field will be considered
 // as a parameter if it has a valid location tag key, or it will
 // be treated as part of the request body.
-func (g *Generator) addStructFieldToOperation(op *Operation, t reflect.Type, idx int, allowBody bool) error {
+func (g *Generator) addStructFieldToOperation(op *Operation, t reflect.Type, idx int, allowBody bool, requestMediaType string) error {
 	sf := t.Field(idx)
 
-	param, err := g.newParameterFromField(idx, t)
+	param, err := g.newParameterFromField(idx, t, requestMediaType)
 	if err != nil {
 		return err
 	}
@@ -601,7 +601,7 @@ func (g *Generator) addStructFieldToOperation(op *Operation, t reflect.Type, idx
 		}
 		// Select the corresponding media type for the
 		// given field tag, or default to any type.
-		mt := tonic.MediaType()
+		mt := requestMediaType
 		if mt == "" {
 			mt = anyMediaType
 		}
@@ -620,7 +620,7 @@ func (g *Generator) addStructFieldToOperation(op *Operation, t reflect.Type, idx
 		} else {
 			schema = op.RequestBody.Content[mt].Schema.Schema
 		}
-		fname := fieldNameFromTag(sf, mediaTags[tonic.MediaType()])
+		fname := fieldNameFromTag(sf, mediaTags[requestMediaType])
 
 		// Check if a field with the same name already exists.
 		if _, ok := schema.Properties[fname]; ok {
@@ -642,7 +642,7 @@ func (g *Generator) addStructFieldToOperation(op *Operation, t reflect.Type, idx
 			schema.Required = append(schema.Required, fname)
 			sort.Strings(schema.Required)
 		}
-		sfs := g.newSchemaFromStructField(sf, required, fname, t)
+		sfs := g.newSchemaFromStructField(sf, required, fname, t, requestMediaType)
 		if schema != nil {
 			schema.Properties[fname] = sfs
 		}
@@ -653,7 +653,7 @@ func (g *Generator) addStructFieldToOperation(op *Operation, t reflect.Type, idx
 // newParameterFromField create a new operation parameter
 // from the struct field at index idx in type in. Only the
 // parameters of type path, query, header or cookie are concerned.
-func (g *Generator) newParameterFromField(idx int, t reflect.Type) (*Parameter, error) {
+func (g *Generator) newParameterFromField(idx int, t reflect.Type, mediaType string) (*Parameter, error) {
 	field := t.Field(idx)
 
 	location, err := g.paramLocation(field, t)
@@ -684,7 +684,7 @@ func (g *Generator) newParameterFromField(idx int, t reflect.Type) (*Parameter, 
 		Description: field.Tag.Get(descriptionTag),
 		Required:    required,
 		Deprecated:  deprecated,
-		Schema:      g.newSchemaFromStructField(field, required, name, t),
+		Schema:      g.newSchemaFromStructField(field, required, name, t, mediaType),
 	}
 	if field.Type.Kind() == reflect.Bool && location == g.config.QueryLocationTag {
 		p.AllowEmptyValue = true
@@ -746,8 +746,8 @@ func (g *Generator) paramLocation(f reflect.StructField, in reflect.Type) (strin
 
 // newSchemaFromStructField returns a new Schema builded
 // from the field's type and its tags.
-func (g *Generator) newSchemaFromStructField(sf reflect.StructField, required bool, fname string, parent reflect.Type) *SchemaOrRef {
-	sor := g.newSchemaFromType(sf.Type)
+func (g *Generator) newSchemaFromStructField(sf reflect.StructField, required bool, fname string, parent reflect.Type, mediaType string) *SchemaOrRef {
+	sor := g.newSchemaFromType(sf.Type, mediaType)
 	if sor == nil {
 		return nil
 	}
@@ -865,7 +865,7 @@ func (g *Generator) enumFromStructField(sf reflect.StructField, fname string, pa
 
 // newSchemaFromType creates a new OpenAPI schema from
 // the given reflect type.
-func (g *Generator) newSchemaFromType(t reflect.Type) *SchemaOrRef {
+func (g *Generator) newSchemaFromType(t reflect.Type, mediaType string) *SchemaOrRef {
 	if t == nil {
 		return nil
 	}
@@ -887,9 +887,9 @@ func (g *Generator) newSchemaFromType(t reflect.Type) *SchemaOrRef {
 	if dt == TypeComplex {
 		switch t.Kind() {
 		case reflect.Slice, reflect.Array, reflect.Map:
-			return g.buildSchemaRecursive(t)
+			return g.buildSchemaRecursive(t, mediaType)
 		case reflect.Struct:
-			return g.newSchemaFromStruct(t)
+			return g.newSchemaFromStruct(t, mediaType)
 		}
 	}
 	if dt == TypeAny {
@@ -910,14 +910,14 @@ func (g *Generator) newSchemaFromType(t reflect.Type) *SchemaOrRef {
 
 // buildSchemaRecursive recursively decomposes the complex
 // type t into subsequent schemas.
-func (g *Generator) buildSchemaRecursive(t reflect.Type) *SchemaOrRef {
+func (g *Generator) buildSchemaRecursive(t reflect.Type, mediaType string) *SchemaOrRef {
 	schema := &Schema{}
 
 	switch t.Kind() {
 	case reflect.Ptr:
-		return g.buildSchemaRecursive(t.Elem())
+		return g.buildSchemaRecursive(t.Elem(), mediaType)
 	case reflect.Struct:
-		return g.newSchemaFromStruct(t)
+		return g.newSchemaFromStruct(t, mediaType)
 	case reflect.Map:
 		// Map type is considered as a type "object"
 		// and should declare underlying items type
@@ -932,7 +932,7 @@ func (g *Generator) buildSchemaRecursive(t reflect.Type) *SchemaOrRef {
 			})
 			return nil
 		}
-		schema.AdditionalProperties = g.buildSchemaRecursive(t.Elem())
+		schema.AdditionalProperties = g.buildSchemaRecursive(t.Elem(), mediaType)
 	case reflect.Slice, reflect.Array:
 		// Slice/Array types are considered as a type
 		// "array" and should declare underlying items
@@ -944,7 +944,7 @@ func (g *Generator) buildSchemaRecursive(t reflect.Type) *SchemaOrRef {
 			schema.MinItems = t.Len()
 			schema.MaxItems = t.Len()
 		}
-		schema.Items = g.buildSchemaRecursive(t.Elem())
+		schema.Items = g.buildSchemaRecursive(t.Elem(), mediaType)
 	default:
 		dt := g.datatype(t)
 		schema.Type, schema.Format = dt.Type(), dt.Format()
@@ -954,7 +954,7 @@ func (g *Generator) buildSchemaRecursive(t reflect.Type) *SchemaOrRef {
 
 // structSchema returns an OpenAPI schema that describe
 // the Go struct represented by the type t.
-func (g *Generator) newSchemaFromStruct(t reflect.Type) *SchemaOrRef {
+func (g *Generator) newSchemaFromStruct(t reflect.Type, mediaType string) *SchemaOrRef {
 	if t.Kind() != reflect.Struct {
 		return nil
 	}
@@ -979,7 +979,7 @@ func (g *Generator) newSchemaFromStruct(t reflect.Type) *SchemaOrRef {
 	if name != "" {
 		g.schemaTypes[t] = struct{}{}
 	}
-	schema = g.flattenStructSchema(t, t, schema)
+	schema = g.flattenStructSchema(t, t, schema, mediaType)
 
 	sor := &SchemaOrRef{Schema: schema}
 
@@ -999,7 +999,7 @@ func (g *Generator) newSchemaFromStruct(t reflect.Type) *SchemaOrRef {
 
 // flattenStructSchema recursively flatten the embedded
 // fields of the struct type t to the given schema.
-func (g *Generator) flattenStructSchema(t, parent reflect.Type, schema *Schema) *Schema {
+func (g *Generator) flattenStructSchema(t, parent reflect.Type, schema *Schema, mediaType string) *Schema {
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		ft := f.Type
@@ -1030,7 +1030,7 @@ func (g *Generator) flattenStructSchema(t, parent reflect.Type, schema *Schema) 
 						Parent:   parent,
 					})
 				} else {
-					schema = g.flattenStructSchema(ft, parent, schema)
+					schema = g.flattenStructSchema(ft, parent, schema, mediaType)
 				}
 			}
 			continue
@@ -1038,7 +1038,7 @@ func (g *Generator) flattenStructSchema(t, parent reflect.Type, schema *Schema) 
 			// Ignore unexported non-embedded fields.
 			continue
 		}
-		fname := fieldNameFromTag(f, mediaTags[tonic.MediaType()])
+		fname := fieldNameFromTag(f, mediaTags[mediaType])
 		if fname == "" {
 			// Field has no name, skip it.
 			continue
@@ -1051,7 +1051,7 @@ func (g *Generator) flattenStructSchema(t, parent reflect.Type, schema *Schema) 
 			schema.Required = append(schema.Required, fname)
 			sort.Strings(schema.Required)
 		}
-		sfs := g.newSchemaFromStructField(f, required, fname, t)
+		sfs := g.newSchemaFromStructField(f, required, fname, t, mediaType)
 		if sfs != nil {
 			schema.Properties[fname] = sfs
 		}
