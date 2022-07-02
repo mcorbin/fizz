@@ -67,4 +67,9 @@ func routes(grp *fizz.RouterGroup) {
 		fizz.Response("400", "Bad request", nil, nil, nil),
 		fizz.Header("X-Market-Listing-Size", "Listing size", fizz.Long),
 	}, tonic.Handler(ListFruits, 200))
+
+	// List all available fruits.
+	grp.GET("/html", []fizz.OperationOption{
+		fizz.Summary("Get HTML"),
+	}, tonic.Handler(HTMLHandler, 200))
 }
