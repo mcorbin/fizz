@@ -1,4 +1,4 @@
-module github.com/wI2L/fizz
+module github.com/mcorbin/fizz
 
 go 1.18
 
@@ -8,7 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/juju/errors v0.0.0-20220622220526-54a94488269b
-	github.com/loopfz/gadgeto v0.11.2
+	github.com/mcorbin/gadgeto v0.12.0
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/text v0.3.7
 	gopkg.in/yaml.v2 v2.4.0
@@ -32,9 +32,7 @@ require (
 	github.com/ugorji/go/codec v1.2.7 // indirect
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
 	golang.org/x/net v0.0.0-20220630215102-69896b714898 // indirect
-	golang.org/x/sys v0.0.0-20220627191245-f75cf1eec38b // indirect
+	golang.org/x/sys v0.0.0-20220702020025-31831981b65f // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/loopfz/gadgeto v0.11.2 => github.com/mcorbin/gadgeto v0.11.3-0.20220701211439-7b70ea363f17
