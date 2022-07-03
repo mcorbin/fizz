@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"reflect"
+	"strings"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -51,6 +53,13 @@ func routes(grp *fizz.RouterGroup) {
 		),
 	}, tonic.Handler(CreateFruit, 200))
 
+	tonic.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+		if name == "-" {
+			return ""
+		}
+		return name
+	})
 	// Remove a fruit from the market,
 	// probably because it rotted.
 	grp.DELETE("/:name", []fizz.OperationOption{
@@ -69,7 +78,21 @@ func routes(grp *fizz.RouterGroup) {
 	}, tonic.Handler(ListFruits, 200))
 
 	// List all available fruits.
-	grp.GET("/html", []fizz.OperationOption{
-		fizz.Summary("Get HTML"),
-	}, tonic.Handler(HTMLHandler, 200))
+	grp.POST("/:name/override", []fizz.OperationOption{
+		fizz.InputModel(OverrideParam{}),
+		fizz.Summary("show how to override tonic hooks/media types for a route"),
+	}, tonic.Handler(Override, 200, func(r *tonic.Route) {
+		r.SetBindHook(func(c *gin.Context, i interface{}) error {
+			// you can override Tonic bind hook per path
+			return nil
+		})
+		r.SetRenderHook(func(c *gin.Context, statusCode int, payload interface{}) {
+			// you can override Tonic render hook per path
+			c.String(statusCode, "<h2>override</h2>")
+		})
+		// you can override Tonic requests/responses Media types per path
+		r.SetResponseMediaType("text/html")
+		// random media type for tests
+		r.SetRequestMediaType("multipart/form-data")
+	}))
 }

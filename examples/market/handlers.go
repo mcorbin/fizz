@@ -1,6 +1,7 @@
 package main
 
 import (
+	"mime/multipart"
 	"strconv"
 	"strings"
 	"time"
@@ -24,6 +25,11 @@ type ListFruitsParams struct {
 	PriceMax *float64 `query:"price_max" description:"filter by maximum inclusive price" validate:"omitempty,max=15"`
 }
 
+type OverrideParam struct {
+	Name string                `path:"name"`
+	File *multipart.FileHeader `form:"file"`
+}
+
 // CreateFruit add a new fruit to the market.
 func CreateFruit(c *gin.Context, fruit *Fruit) (*Fruit, error) {
 	market.Lock()
@@ -40,8 +46,7 @@ func CreateFruit(c *gin.Context, fruit *Fruit) (*Fruit, error) {
 	return fruit, nil
 }
 
-// HTMLHandler
-func HTMLHandler(c *gin.Context) (string, error) {
+func Override(c *gin.Context, params *OverrideParam) (string, error) {
 	return "<h1>Hello</h1>", nil
 }
 
