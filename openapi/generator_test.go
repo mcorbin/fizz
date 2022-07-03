@@ -370,7 +370,7 @@ func TestNewSchemaFromStructFieldFormat(t *testing.T) {
 	typ := reflect.TypeOf(T{})
 
 	// Field A is required and has a default value.
-	sor := g.newSchemaFromStructField(typ.Field(0), true, "A", typ)
+	sor := g.newSchemaFromStructField(typ.Field(0), true, "A", typ, tonic.MediaType())
 	assert.NotNil(t, sor)
 	assert.Len(t, g.Errors(), 1)
 	assert.Implements(t, (*error)(nil), g.Errors()[0])
