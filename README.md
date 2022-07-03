@@ -6,7 +6,7 @@ This repository is a fork of [wl2L/fizz](https://github.com/wI2L/fizz) which con
 
 It's also based on my [Tonic](https://github.com/mcorbin/gadgeto/) fork which contain several improvements.
 
-## Original README
+## README
 
 <p align="center">Fizz is a wrapper for <strong>Gin</strong> based on <strong><a href="https://github.com/loopfz/gadgeto/tree/master/tonic">gadgeto/tonic</a></strong>.</p>
 <p align="center">It generates wrapping gin-compatible handlers that do all the repetitive work and wrap the call to your handlers. It can also generates an <i>almost</i> complete <strong>OpenAPI 3</strong> specification of your API.</p>
