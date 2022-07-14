@@ -184,6 +184,8 @@ type Schema struct {
 	Required         []string      `json:"required,omitempty" yaml:"required,omitempty"`
 	Enum             []interface{} `json:"enum,omitempty" yaml:"enum,omitempty"`
 	Deprecated       bool          `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
+	contentEncoding  string        `json:"contentEncoding,omitempty" yaml:"contentEncoding,omitempty"`
+	contentMediaType string        `json:"contentMediaType,omitempty" yaml:"contentMediaType,omitempty"`
 }
 
 // Operation describes an API operation on a path.
