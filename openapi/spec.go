@@ -163,15 +163,16 @@ type Schema struct {
 	Format               string                  `json:"format,omitempty" yaml:"format,omitempty"`
 	Default              interface{}             `json:"default,omitempty" yaml:"default,omitempty"`
 	Example              interface{}             `json:"example,omitempty" yaml:"example,omitempty"`
+	Examples             interface{}             `json:"examples,omitempty" yaml:"examples,omitempty"`
 
 	// The following properties are taken directly from the
 	// JSON Schema definition and follow the same specifications
 	Title            string        `json:"title,omitempty" yaml:"title,omitempty"`
 	MultipleOf       int           `json:"multipleOf,omitempty" yaml:"multipleOf,omitempty"`
 	Maximum          int           `json:"maximum,omitempty" yaml:"maximum,omitempty"`
-	ExclusiveMaximum bool          `json:"exclusiveMaximum,omitempty" yaml:"exclusiveMaximum,omitempty"`
+	ExclusiveMaximum int           `json:"exclusiveMaximum,omitempty" yaml:"exclusiveMaximum,omitempty"`
 	Minimum          int           `json:"minimum,omitempty" yaml:"minimum,omitempty"`
-	ExclusiveMinimum bool          `json:"exclusiveMinimum,omitempty" yaml:"exclusiveMinimum,omitempty"`
+	ExclusiveMinimum int           `json:"exclusiveMinimum,omitempty" yaml:"exclusiveMinimum,omitempty"`
 	MaxLength        int           `json:"maxLength,omitempty" yaml:"maxLength,omitempty"`
 	MinLength        int           `json:"minLength,omitempty" yaml:"minLength,omitempty"`
 	Pattern          string        `json:"pattern,omitempty" yaml:"pattern,omitempty"`
