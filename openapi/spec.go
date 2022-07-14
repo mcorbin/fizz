@@ -152,7 +152,7 @@ type Schema struct {
 	// The following properties are taken from the JSON Schema
 	// definition but their definitions were adjusted to the
 	// OpenAPI Specification.
-	Type                 string                  `json:"type,omitempty" yaml:"type,omitempty"`
+	Type                 []string                `json:"type,omitempty" yaml:"type,omitempty"`
 	AllOf                *SchemaOrRef            `json:"allOf,omitempty" yaml:"allOf,omitempty"`
 	OneOf                *SchemaOrRef            `json:"oneOf,omitempty" yaml:"oneOf,omitempty"`
 	AnyOf                *SchemaOrRef            `json:"anyOf,omitempty" yaml:"anyOf,omitempty"`
@@ -182,7 +182,6 @@ type Schema struct {
 	MinProperties    int           `json:"minProperties,omitempty" yaml:"minProperties,omitempty"`
 	Required         []string      `json:"required,omitempty" yaml:"required,omitempty"`
 	Enum             []interface{} `json:"enum,omitempty" yaml:"enum,omitempty"`
-	Nullable         bool          `json:"nullable,omitempty" yaml:"nullable,omitempty"`
 	Deprecated       bool          `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
 }
 

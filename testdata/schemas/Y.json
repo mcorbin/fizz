@@ -1,36 +1,35 @@
 {
-    "type": "object",
+    "type": ["object"],
     "properties": {
         "H": {
-            "type": "number",
+            "type": ["number"],
             "format": "float"
         },
         "I": {
-            "type": "string",
+            "type": ["string"],
             "format": "date"
         },
         "J": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
+            "type": ["integer", "null"],
+            "format": "int32"
         },
         "K": {
-            "type": "object",
+            "type": ["object"],
             "additionalProperties": {
                 "$ref": "#/components/schemas/Y"
             }
         },
         "N": {
-            "type": "object",
+            "type": ["object"],
             "properties": {
                 "Na": {
-                    "type": "string"
+                    "type": ["string"]
                 },
                 "Nb": {
-                    "type": "string"
+                    "type": ["string"]
                 },
                 "Nc": {
-                    "type": "string",
+                    "type": ["string"],
                     "format": "duration"
                 }
             }

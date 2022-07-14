@@ -24,7 +24,7 @@
                 "description": "This is A",
                 "required": true,
                 "schema": {
-                    "type": "integer",
+                    "type": ["integer"],
                     "description": "This is A",
                     "format": "int32"
                 }
@@ -35,7 +35,7 @@
                 "description": "This is B",
                 "required": true,
                 "schema": {
-                    "type": "string",
+                    "type": ["string"],
                     "description": "This is B",
                     "format": "date-time"
                 }
@@ -45,23 +45,23 @@
                 "in": "query",
                 "allowEmptyValue": true,
                 "schema": {
-                    "type": "boolean"
+                    "type": ["boolean"]
                 }
             },
             {
                 "name": "i",
                 "in": "query",
                 "schema": {
-                    "type": "string"
+                    "type": ["string"]
                 }
             },
             {
                 "name": "k",
                 "in": "query",
                 "schema": {
-                    "type": "array",
+                    "type": ["array"],
                     "items": {
-                        "type": "string",
+                        "type": ["string"],
                         "enum": [
                             "aaa",
                             "bbb",
@@ -76,7 +76,7 @@
                 "name": "xd",
                 "in": "query",
                 "schema": {
-                    "type": "integer",
+                    "type": ["integer"],
                     "format": "int32",
                     "default": 1,
                     "enum": [
@@ -91,7 +91,7 @@
                 "in": "header",
                 "description": "This is C",
                 "schema": {
-                    "type": "string",
+                    "type": ["string"],
                     "description": "This is C",
                     "default": "test"
                 }
@@ -113,20 +113,20 @@
                     "X-Test-Header": {
                         "description": "Test header",
                         "schema": {
-                            "type": "string"
+                            "type": ["string"]
                         }
                     },
                     "X-Test-Header-Alt": {
                         "description": "Test header alt",
                         "schema": {
-                            "type": "string"
+                            "type": ["string"]
                         }
                     }
                 },
                 "content": {
                     "application/json": {
                         "schema": {
-                            "type": "object",
+                            "type": ["object"],
                             "additionalProperties": {
                                 "$ref": "#/components/schemas/Y"
                             }

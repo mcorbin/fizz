@@ -30,7 +30,7 @@ paths:
         in: path
         required: true
         schema:
-          type: string
+          type: [string]
       responses:
         '200':
           description: OK
@@ -38,7 +38,7 @@ paths:
             X-Request-Id:
               description: Unique request ID
               schema:
-                type: string
+                type: [string]
           content:
             application/json:
               schema:
@@ -48,7 +48,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                type: [string]
               examples:
                 one:
                   value: message1
@@ -59,7 +59,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                type: [string]
               example: not-found-example
         '429':
           description: Too Many Requests
@@ -67,12 +67,12 @@ paths:
             X-Rate-Limit:
               description: Rate limit
               schema:
-                type: integer
+                type: [integer]
                 format: int32
           content:
             application/json:
               schema:
-                type: string
+                type: [string]
       deprecated: true
       x-codeSamples:
         - lang: Shell
@@ -88,17 +88,17 @@ paths:
         in: path
         required: true
         schema:
-          type: string
+          type: [string]
       - name: b
         in: path
         required: true
         schema:
-          type: integer
+          type: [integer]
           format: int32
       - name: q
         in: query
         schema:
-          type: string
+          type: [string]
       responses:
         '200':
           description: OK
@@ -115,7 +115,7 @@ paths:
         in: path
         required: true
         schema:
-          type: string
+          type: [string]
       requestBody:
         content:
           application/json:
@@ -127,30 +127,30 @@ paths:
 components:
   schemas:
     FizzCustomTime:
-      type: object
+      type: [object]
       description: This is Z
       example: 2022-02-07T18:00:00
     FizzT:
-      type: object
+      type: [object]
       properties:
         x:
-          type: string
+          type: [string]
           description: This is X
         "y":
-          type: integer
+          type: [integer]
           description: This is Y
           format: int32
         z:
           $ref: '#/components/schemas/FizzCustomTime'
     PostTestInput:
-      type: object
+      type: [object]
       properties:
         message:
-          type: string
+          type: [string]
           description: "A short message"
         value:
+          type: ["null"]
           description: "A nullable value of arbitrary type"
-          nullable: true
   securitySchemes:
     api_key:
       type: apiKey

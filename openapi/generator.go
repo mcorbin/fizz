@@ -12,6 +12,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/mcorbin/gadgeto/tonic"
+	"golang.org/x/exp/slices"
 )
 
 const (
@@ -421,7 +422,7 @@ func (g *Generator) setOperationResponse(op *Operation, t reflect.Type, code, mt
 			var sor *SchemaOrRef
 			if h.Model == nil {
 				// default to string if no type is given.
-				sor = &SchemaOrRef{Schema: &Schema{Type: "string"}}
+				sor = &SchemaOrRef{Schema: &Schema{Type: []string{"string"}}}
 			} else {
 				sor = g.newSchemaFromType(reflect.TypeOf(h.Model), mt)
 			}
@@ -611,7 +612,7 @@ func (g *Generator) addStructFieldToOperation(op *Operation, t reflect.Type, idx
 		// have been added yet.
 		if _, ok := op.RequestBody.Content[mt]; !ok {
 			schema = &Schema{
-				Type:       "object",
+				Type:       []string{"object"},
 				Properties: make(map[string]*SchemaOrRef),
 			}
 			op.RequestBody.Content[mt] = &MediaType{
@@ -790,7 +791,7 @@ func (g *Generator) newSchemaFromStructField(sf reflect.StructField, required bo
 	// parameter is an array, instead of the parameter schema.
 	enum := g.enumFromStructField(sf, fname, parent)
 
-	if schema.Type == "array" && schema.Items != nil {
+	if slices.Contains(schema.Type, "array") && schema.Items != nil {
 		itemsSchema := g.resolveSchema(schema.Items)
 		if itemsSchema != nil {
 			itemsSchema.Enum = enum
@@ -895,15 +896,18 @@ func (g *Generator) newSchemaFromType(t reflect.Type, mediaType string) *SchemaO
 	if dt == TypeAny {
 		return &SchemaOrRef{
 			Schema: &Schema{
-				Nullable:    true,
+				Type:        []string{"null"},
 				Description: "Value of any type, including null",
 			},
 		}
 	}
+	types := []string{dt.Type()}
+	if nullable {
+		types = append(types, "null")
+	}
 	schema := &Schema{
-		Type:     dt.Type(),
-		Format:   dt.Format(),
-		Nullable: nullable,
+		Type:   types,
+		Format: dt.Format(),
 	}
 	return &SchemaOrRef{Schema: schema}
 }
@@ -922,7 +926,7 @@ func (g *Generator) buildSchemaRecursive(t reflect.Type, mediaType string) *Sche
 		// Map type is considered as a type "object"
 		// and should declare underlying items type
 		// in additional properties field.
-		schema.Type = "object"
+		schema.Type = []string{"object"}
 
 		// JSON Schema allow only strings as object key.
 		if t.Key().Kind() != reflect.String {
@@ -937,7 +941,7 @@ func (g *Generator) buildSchemaRecursive(t reflect.Type, mediaType string) *Sche
 		// Slice/Array types are considered as a type
 		// "array" and should declare underlying items
 		// type in items field.
-		schema.Type = "array"
+		schema.Type = []string{"array"}
 
 		// Go arrays have fixed size.
 		if t.Kind() == reflect.Array {
@@ -947,7 +951,7 @@ func (g *Generator) buildSchemaRecursive(t reflect.Type, mediaType string) *Sche
 		schema.Items = g.buildSchemaRecursive(t.Elem(), mediaType)
 	default:
 		dt := g.datatype(t)
-		schema.Type, schema.Format = dt.Type(), dt.Format()
+		schema.Type, schema.Format = []string{dt.Type()}, dt.Format()
 	}
 	return &SchemaOrRef{Schema: schema}
 }
@@ -970,7 +974,7 @@ func (g *Generator) newSchemaFromStruct(t reflect.Type, mediaType string) *Schem
 		}}
 	}
 	schema := &Schema{
-		Type:       "object",
+		Type:       []string{"object"},
 		Properties: make(map[string]*SchemaOrRef),
 	}
 	// Register the type once before diving into

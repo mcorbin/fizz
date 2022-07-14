@@ -13,6 +13,7 @@ import (
 	"github.com/Pallinder/go-randomdata"
 	"github.com/mcorbin/gadgeto/tonic"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/exp/slices"
 )
 
 var genConfig = &SpecGenConfig{
@@ -127,9 +128,9 @@ func TestSchemaFromPrimitiveType(t *testing.T) {
 	if schema.Schema == nil {
 		t.Error("expected an inlined schema, got a schema reference")
 	}
-	assert.Equal(t, "integer", schema.Type)
+	assert.Equal(t, []string{"integer", "null"}, schema.Type)
 	assert.Equal(t, "int64", schema.Format)
-	assert.True(t, schema.Nullable)
+	assert.True(t, slices.Contains(schema.Type, "null"))
 }
 
 // TestSchemaFromInterface tests that a schema
@@ -140,9 +141,9 @@ func TestSchemaFromInterface(t *testing.T) {
 
 	schema := g.newSchemaFromType(tofEmptyInterface, tonic.MediaType())
 	assert.NotNil(t, schema)
-	assert.Empty(t, schema.Type)
+	assert.NotEmpty(t, schema.Type)
 	assert.Empty(t, schema.Format)
-	assert.True(t, schema.Nullable)
+	assert.True(t, slices.Contains(schema.Type, "null"))
 	assert.NotEmpty(t, schema.Description)
 }
 
@@ -717,7 +718,7 @@ func TestOverrideSchema(t *testing.T) {
 	schema := g.resolveSchema(sor)
 	assert.NotNil(t, schema)
 
-	assert.Equal(t, "string", schema.Type)
+	assert.Equal(t, []string{"string"}, schema.Type)
 	assert.Equal(t, "wallet", schema.Format)
 }
 
