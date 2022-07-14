@@ -146,6 +146,10 @@ func (sor *SchemaOrRef) MarshalYAML() (interface{}, error) {
 	return sor.Reference, nil
 }
 
+type Conditional struct {
+	Properties map[string]*SchemaOrRef `json:"properties,omitempty" yaml:"properties,omitempty"`
+}
+
 // Schema represents the definition of input and output data
 // types of the API.
 type Schema struct {
@@ -184,8 +188,12 @@ type Schema struct {
 	Required         []string      `json:"required,omitempty" yaml:"required,omitempty"`
 	Enum             []interface{} `json:"enum,omitempty" yaml:"enum,omitempty"`
 	Deprecated       bool          `json:"deprecated,omitempty" yaml:"deprecated,omitempty"`
-	contentEncoding  string        `json:"contentEncoding,omitempty" yaml:"contentEncoding,omitempty"`
-	contentMediaType string        `json:"contentMediaType,omitempty" yaml:"contentMediaType,omitempty"`
+	ContentEncoding  string        `json:"contentEncoding,omitempty" yaml:"contentEncoding,omitempty"`
+	ContentMediaType string        `json:"contentMediaType,omitempty" yaml:"contentMediaType,omitempty"`
+	ConstValue       string        `json:"const,omitempty" yaml:"const,omitempty"`
+	If               *Conditional  `json:"if,omitempty" yaml:"if,omitempty"`
+	Then             *Conditional  `json:"then,omitempty" yaml:"then,omitempty"`
+	Else             *Conditional  `json:"else,omitempty" yaml:"else,omitempty"`
 }
 
 // Operation describes an API operation on a path.
