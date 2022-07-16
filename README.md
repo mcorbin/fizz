@@ -236,6 +236,8 @@ You can use additional tags. Some will be interpreted by *tonic*, others will be
 | `validate`    | Field validation rules. Read the [documentation](https://godoc.org/gopkg.in/go-playground/validator.v8) for more informations.                                                                                                                                                        |
 | `explode`     | Specifies whether arrays should generate separate parameters for each array item or object property (limited to query parameters with *form* style). Accepted values are `1`, `t`, `T`, `TRUE`, `true`, `True`, `0`, `f`, `F`, `FALSE`. Invalid value are considered to be false.     |
 
+| `const`     | Specifies a `const` parameter in OpenAPI     |
+
 ### JSON/XML
 
 The JSON/XML encoders usually omit a field that has the tag `"-"`. This behaviour is reproduced by the *OpenAPI* generator ; a field with this tag won't appear in the properties of the schema.

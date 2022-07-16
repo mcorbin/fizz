@@ -18,6 +18,7 @@ import (
 const (
 	version              = "3.1.0"
 	anyMediaType         = "*/*"
+	constTag             = "const"
 	formatTag            = "format"
 	deprecatedTag        = "deprecated"
 	descriptionTag       = "description"
@@ -815,6 +816,9 @@ func (g *Generator) newSchemaFromStructField(sf reflect.StructField, required bo
 	// auto inferred manually via tags.
 	if t, ok := sf.Tag.Lookup(formatTag); ok {
 		schema.Format = t
+	}
+	if t, ok := sf.Tag.Lookup(constTag); ok {
+		schema.ConstValue = t
 	}
 
 	// Set example value from tag to schema

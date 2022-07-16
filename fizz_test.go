@@ -141,7 +141,7 @@ func (c customTime) ParseExample(v string) (interface{}, error) {
 
 type T struct {
 	X string     `json:"x" yaml:"x" description:"This is X"`
-	Y int        `json:"y" yaml:"y" description:"This is Y"`
+	Y int        `json:"y" yaml:"y" description:"This is Y" const:"val"`
 	Z customTime `json:"z" yaml:"z" example:"2022-02-07T18:00:00+09:00" description:"This is Z"`
 }
 type In struct {

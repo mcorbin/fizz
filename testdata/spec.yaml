@@ -140,6 +140,7 @@ components:
           type: [integer]
           description: This is Y
           format: int32
+          const: "val"
         z:
           $ref: '#/components/schemas/FizzCustomTime'
     PostTestInput:
