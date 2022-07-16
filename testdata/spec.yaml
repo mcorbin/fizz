@@ -136,11 +136,12 @@ components:
         x:
           type: [string]
           description: This is X
+          const: "fixed"
+          contentEncoding: "base64"
         "y":
           type: [integer]
           description: This is Y
           format: int32
-          const: "val"
         z:
           $ref: '#/components/schemas/FizzCustomTime'
     PostTestInput:

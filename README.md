@@ -237,6 +237,8 @@ You can use additional tags. Some will be interpreted by *tonic*, others will be
 | `explode`     | Specifies whether arrays should generate separate parameters for each array item or object property (limited to query parameters with *form* style). Accepted values are `1`, `t`, `T`, `TRUE`, `true`, `True`, `0`, `f`, `F`, `FALSE`. Invalid value are considered to be false.     |
 
 | `const`     | Specifies a `const` parameter in OpenAPI     |
+| `contentEncoding`     | Specifies the `contentEncoding` parameter in OpenAPI     |
+| `contentMediaType`     | Specifies the `contentMediaType` parameter in OpenAPI     |
 
 ### JSON/XML
 

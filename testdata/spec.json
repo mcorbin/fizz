@@ -216,13 +216,14 @@
                 "properties":{
                     "x":{
                         "type":["string"],
-                        "description":"This is X"
+                        "description":"This is X",
+                        "const": "fixed",
+                        "contentEncoding": "base64"
                     },
                     "y":{
                         "type":["integer"],
                         "description":"This is Y",
-                        "format":"int32",
-                        "const": "val"
+                        "format":"int32"
                     },
                     "z":{
                         "$ref":"#/components/schemas/FizzCustomTime"
